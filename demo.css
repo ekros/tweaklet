@@ -1,0 +1,33 @@
+div.flex {
+    display: flex;
+  }
+  div.square {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    border: 1px solid blue;
+  }
+  div.square1 {
+    background: crimson;
+  }
+  div.square2 {
+    background: palegreen;
+  }
+  div.square3 {
+    background: deepskyblue;
+  }
+  
+  div.hello {
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    border: 1px solid black;
+    cursor: pointer;
+    position: relative;
+    left: 200px;
+  }
+  
+  img.cat {
+    position: relative;
+    left: 200px;
+  }

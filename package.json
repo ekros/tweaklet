@@ -1,0 +1,25 @@
+{
+  "name": "tweaklet",
+  "version": "1.0.0",
+  "description": "Bookmarklet that allows you to modify any website",
+  "main": "tweaklet.js",
+  "scripts": {
+    "dev": "serve ./",
+    "build": "uglifyjs ./tweaklet.js --compress --mangle -o tweaklet.min.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekros/tweaklet.git"
+  },
+  "author": "Eric Ros<ekros@outlook.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ekros/tweaklet/issues"
+  },
+  "homepage": "https://github.com/ekros/tweaklet#readme",
+  "dependencies": {
+    "serve": "^13.0.2",
+    "uglify-js": "^3.16.1"
+  }
+}
