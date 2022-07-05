@@ -1,33 +1,86 @@
-div.flex {
-    display: flex;
-  }
-  div.square {
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-    border: 1px solid blue;
-  }
-  div.square1 {
-    background: crimson;
-  }
-  div.square2 {
-    background: palegreen;
-  }
-  div.square3 {
-    background: deepskyblue;
-  }
-  
-  div.hello {
-    width: 100px;
-    height: 100px;
-    margin: 5px;
-    border: 1px solid black;
-    cursor: pointer;
-    position: relative;
-    left: 200px;
-  }
-  
-  img.cat {
-    position: relative;
-    left: 200px;
-  }
+body {
+  font-family: 'Secular One', sans-serif;
+  background: linear-gradient(158.15deg, #f03573 0%, #6060f1 100%);
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  color: white;
+  font-family: 'Permanent Marker', cursive;
+  text-align: center;
+  text-shadow: 1px 1px black;
+}
+
+.description {
+  text-align: center;
+}
+
+.call-to-action {
+  display: flex;
+  justify-content: center;
+}
+
+.call-to-action a {
+  width: fit-content;
+  height: 70px;
+  background: pink;
+  color: black;
+  cursor: pointer;
+  font-size: 20px;
+  margin-top: 100px;
+  padding: 2px 5px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.call-to-action a .call-to-action__product-name {
+  font-family: 'Permanent Marker', cursive;
+}
+
+.call-to-action small {
+  font-size: 12px;
+}
+
+.copy-and-donation {
+  position: absolute;
+  bottom: 20px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.features {
+  display: flex;
+  justify-content: center;
+}
+
+.features .feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid black;
+  border-radius: 4px;
+  margin: 10px;
+  padding: 4px;
+}
+
+.features .feature img {
+  width: 70%;
+}
+
+.features .feature .feature__label {
+  width: 100%;
+  background: black;
+  color: white; 
+  text-align: center;
+}
+
+.features .feature .feature__space {
+  flex: 0 0 12px;
+}
