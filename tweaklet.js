@@ -139,19 +139,20 @@ indicator.addEventListener("click", () => {
 
 // draw instructions
 const instructions = document.createElement("div");
-instructions.style = "position:fixed;top:0px;left:55%;background:orange;padding:0px 3px;font-size:14px;cursor:pointer";
+instructions.style = "position:fixed;top:0px;left:calc(50vw + 120px);background:orange;padding:0px 3px;font-size:14px;cursor:pointer";
 instructions.innerHTML = "?";
 document.body.appendChild(instructions);
 instructions.addEventListener("mouseover", () => {
   const overlay = document.createElement("div");
-  overlay.style = "position:fixed;top:20px;left:55%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
+  overlay.style = "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
   overlay.innerHTML = `- Click any element to select<br>
   - Drag any element in the page to change its position<br>
   - Double click: edit text<br>
   - Shift + mouse wheel: resize the element<br>
   - Mouse wheel: bring element forwards/backwards (change z-index)<br>
   - Supr: delete element<br>
-  - Ctrl+Z: to undo changes<br>
+  - Ctrl+Z: to undo changes<br><br>
+  know more: tweaklet.com
   `;
   document.body.appendChild(overlay);
   instructions.addEventListener("mouseleave", () => {
