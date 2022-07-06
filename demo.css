@@ -46,10 +46,14 @@ body {
 }
 
 .copy-and-donation {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
   position: absolute;
   bottom: 20px;
   font-size: 12px;
   text-align: center;
+  width: 100%;
 }
 
 .features {
@@ -82,5 +86,5 @@ body {
 }
 
 .features .feature .feature__space {
-  flex: 0 0 12px;
+  flex: 1;
 }
