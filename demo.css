@@ -28,6 +28,8 @@ body {
   width: fit-content;
   height: 70px;
   background: pink;
+  border-radius: 3px;
+  box-shadow: 2px 2px 4px black;
   color: black;
   cursor: pointer;
   font-size: 20px;
@@ -35,6 +37,12 @@ body {
   padding: 2px 5px;
   text-align: center;
   text-decoration: none;
+  transition: transform 500ms, box-shadow 500ms;
+}
+
+.call-to-action a:hover {
+  transform: scale(1.1);
+  box-shadow: 6px 6px 6px black;
 }
 
 .call-to-action a .call-to-action__product-name {
@@ -53,7 +61,7 @@ body {
   bottom: 20px;
   font-size: 12px;
   text-align: center;
-  width: 100%;
+  width: 99%;
 }
 
 .features {
