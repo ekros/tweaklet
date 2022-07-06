@@ -1,6 +1,6 @@
 {
   "name": "tweaklet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Bookmarklet that allows you to modify any website",
   "main": "tweaklet.js",
   "scripts": {
