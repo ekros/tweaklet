@@ -21,10 +21,10 @@ body {
 
 .call-to-action {
   display: flex;
+  position: relative;
+  flex-direction: column;
   justify-content: center;
-}
-
-.call-to-action a {
+  align-self: center;
   width: fit-content;
   height: 70px;
   background: pink;
@@ -37,20 +37,21 @@ body {
   padding: 2px 5px;
   text-align: center;
   text-decoration: none;
-  transition: transform 500ms, box-shadow 500ms;
 }
 
-.call-to-action a:hover {
-  transform: scale(1.1);
-  box-shadow: 6px 6px 6px black;
-}
-
-.call-to-action a .call-to-action__product-name {
+.call-to-action .call-to-action__product-name {
   font-family: 'Permanent Marker', cursive;
 }
 
 .call-to-action small {
   font-size: 12px;
+}
+
+.call-to-action a {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  font-size: 0px;
 }
 
 .copy-and-donation {
