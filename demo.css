@@ -97,3 +97,9 @@ body {
 .features .feature .feature__space {
   flex: 1;
 }
+
+.github-link {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
