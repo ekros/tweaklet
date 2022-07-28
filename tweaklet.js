@@ -6,38 +6,103 @@ let target;
 let scale = 1;
 let enabled = true;
 let selectedElement;
-const inlineElements = ["A", "ABBR", "ACRONYM", "B", "BDI", "BDO", "BIG", "BR", "BUTTON", "CANVAS", "CITE", "CODE", "DATA", "DATALIST", "DEL", "DFN", "DEL", "DFN", "EM", "EMBED", "I", "IFRAME", "IMG", "INPUT", "INS", "KBD", "LABEL", "MAP", "MARK", "METER", "NOSCRIPT", "OBJECT", "OUTPUT", "PICTURE", "PROGRESS", "Q", "RUBY", "S", "SAMP", "SCRIPT", "SELECT", "SLOT", "SMALL", "SPAN", "STRONG", "SUB", "SUP", "SVG", "TEMPLATE", "TEXTAREA", "TIME", "U", "TT", "VAR", "VIDEO", "WBR"];
+const inlineElements = [
+  "A",
+  "ABBR",
+  "ACRONYM",
+  "B",
+  "BDI",
+  "BDO",
+  "BIG",
+  "BR",
+  "BUTTON",
+  "CANVAS",
+  "CITE",
+  "CODE",
+  "DATA",
+  "DATALIST",
+  "DEL",
+  "DFN",
+  "DEL",
+  "DFN",
+  "EM",
+  "EMBED",
+  "I",
+  "IFRAME",
+  "IMG",
+  "INPUT",
+  "INS",
+  "KBD",
+  "LABEL",
+  "MAP",
+  "MARK",
+  "METER",
+  "NOSCRIPT",
+  "OBJECT",
+  "OUTPUT",
+  "PICTURE",
+  "PROGRESS",
+  "Q",
+  "RUBY",
+  "S",
+  "SAMP",
+  "SCRIPT",
+  "SELECT",
+  "SLOT",
+  "SMALL",
+  "SPAN",
+  "STRONG",
+  "SUB",
+  "SUP",
+  "SVG",
+  "TEMPLATE",
+  "TEXTAREA",
+  "TIME",
+  "U",
+  "TT",
+  "VAR",
+  "VIDEO",
+  "WBR",
+];
 const actionHistory = [];
+let copiedElement;
 
-const handleAnchorClick = ev => {
+const handleAnchorClick = (ev) => {
   ev.preventDefault();
-}
+};
 
-const handleMouseMove = ev => {
+const handleMouseMove = (ev) => {
   if (target) {
-    if (target.style.transform.includes('translate')) {
-      target.style.transform = target.style.transform.replace(/translate\(.*\)/, `translate(${ev.clientX-target.originalLeft}px, ${ev.clientY-target.originalTop}px)`);
+    if (target.style.transform.includes("translate")) {
+      target.style.transform = target.style.transform.replace(
+        /translate\(.*\)/,
+        `translate(${ev.clientX - target.originalLeft}px, ${
+          ev.clientY - target.originalTop
+        }px)`
+      );
     } else {
-      target.style.transform += ` translate(${ev.clientX-target.originalLeft}px, ${ev.clientY-target.originalTop}px)`;
+      target.style.transform += ` translate(${
+        ev.clientX - target.originalLeft
+      }px, ${ev.clientY - target.originalTop}px)`;
     }
   }
-}
+};
 
-const handleMouseUp = ev => {
-  document.removeEventListener("mouseup", handleMouseUp);  
-  document.removeEventListener("mousemove", handleMouseMove); 
+const handleMouseUp = (ev) => {
+  document.removeEventListener("mouseup", handleMouseUp);
+  document.removeEventListener("mousemove", handleMouseMove);
   if (target) {
-   target.style.filter = "none"; 
+    target.style.filter = "none";
   }
   actionHistory.push({
     target,
     action: "move",
-    value: { left: ev.clientX, top: ev.clientY }
+    value: { left: ev.clientX, top: ev.clientY },
   });
   target = null;
-}
+};
 
-const handleMouseDown = ev => {
+const handleMouseDown = (ev) => {
   if (ev.button === 0) {
     ev.stopPropagation();
     if (selectedElement) {
@@ -52,74 +117,80 @@ const handleMouseDown = ev => {
     actionHistory.push({
       target,
       action: "move",
-      value: { left: ev.target.originalLeft, top: ev.target.originalTop }
+      value: { left: ev.target.originalLeft, top: ev.target.originalTop },
     });
   }
-}
+};
 
-const handleMouseLeave = ev => {
+const handleMouseLeave = (ev) => {
   if (ev.target.style.outline === "black solid 1px") {
     ev.target.style.outline = "none";
   }
   ev.target.removeEventListener("mouseleave", handleMouseLeave);
-}
+};
 
-const handleMouseOver = ev => {
+const handleMouseOver = (ev) => {
   if (ev.target.style.outline !== "green solid 2px") {
     ev.target.style.outline = "1px solid black";
   }
   ev.target.addEventListener("mouseleave", handleMouseLeave);
-}
+};
 
-const handleDblClick = ev => {
+const handleDblClick = (ev) => {
   ev.stopPropagation();
   ev.target.contentEditable = true;
-}
+};
+
+// enable tweaklet for one element
+const enableTweakletForElement = (e) => {
+  // disable draggable behaviour on anchors
+  if (e.nodeName === "A") {
+    e.draggable = "false";
+    e.addEventListener("click", handleAnchorClick);
+  }
+  // inline elements
+  if (inlineElements.includes(e.nodeName)) {
+    e.style.display = "inline-block";
+  }
+  const rect = e.getBoundingClientRect();
+  if (!e.style) {
+    e.style = {};
+  }
+  e.originalTop = rect.top;
+  e.originalLeft = rect.left;
+  e.addEventListener("dblclick", handleDblClick);
+  e.addEventListener("mousedown", handleMouseDown);
+  e.addEventListener("mouseover", handleMouseOver);
+};
 
 // enable tweaklet
 const enableTweaklet = () => {
   const elements = document.querySelectorAll("*");
   document.body.style["user-select"] = "none";
-  elements.forEach(e => {
-    // disable draggable behaviour on anchors
-    if (e.nodeName === "A") {
-      e.draggable = "false";
-      e.addEventListener("click", handleAnchorClick)
-    }
-    // inline elements
-    if (inlineElements.includes(e.nodeName)) {
-        e.style.display = "inline-block";
-    }
-    const rect = e.getBoundingClientRect();
-    if (!e.style) {
-      e.style = {}; 
-    }
-    e.originalTop = rect.top;
-    e.originalLeft = rect.left;
-    e.addEventListener("dblclick", handleDblClick);
-    e.addEventListener("mousedown", handleMouseDown);
-    e.addEventListener("mouseover", handleMouseOver);
-  });  
-}
+  elements.forEach((e) => {
+    enableTweakletForElement(e);
+  });
+};
 
 const disableTweaklet = () => {
   const elements = document.querySelectorAll("*");
   document.body.style["user-select"] = "auto";
-  elements.forEach(e => {
+  elements.forEach((e) => {
     // disable draggable behaviour on anchors
     if (e.nodeName === "A") {
       e.draggable = "false";
-      e.removeEventListener("click", handleAnchorClick)
+      e.removeEventListener("click", handleAnchorClick);
     }
     e.removeEventListener("dblclick", handleDblClick);
     e.removeEventListener("mousedown", handleMouseDown);
     e.removeEventListener("mouseover", handleMouseOver);
   });
-}
+};
 
 // draw indicator
 const indicator = document.createElement("div");
-indicator.style = "position:fixed;top:0px;left:50%;background:palegreen;padding:0px 3px;font-size:12px;cursor:pointer";
+indicator.style =
+  "position:fixed;top:0px;left:50%;background:palegreen;padding:0px 3px;font-size:12px;cursor:pointer";
 indicator.title = "Click to enable/disable";
 indicator.innerHTML = "Tweaklet enabled";
 document.body.appendChild(indicator);
@@ -139,12 +210,14 @@ indicator.addEventListener("click", () => {
 
 // draw instructions
 const instructions = document.createElement("div");
-instructions.style = "position:fixed;top:0px;left:calc(50vw + 120px);background:orange;padding:0px 3px;font-size:14px;cursor:pointer";
+instructions.style =
+  "position:fixed;top:0px;left:calc(50vw + 120px);background:orange;padding:0px 3px;font-size:14px;cursor:pointer";
 instructions.innerHTML = "?";
 document.body.appendChild(instructions);
 instructions.addEventListener("mouseover", () => {
   const overlay = document.createElement("div");
-  overlay.style = "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
+  overlay.style =
+    "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
   overlay.innerHTML = `- Click any element to select<br>
   - Drag any element in the page to change its position<br>
   - Double click: edit text<br>
@@ -157,36 +230,61 @@ instructions.addEventListener("mouseover", () => {
   document.body.appendChild(overlay);
   instructions.addEventListener("mouseleave", () => {
     overlay.parentNode?.removeChild(overlay);
-  })
+  });
 });
 
-document.addEventListener("keydown", ev => {
-  if (ev.key === "z" && ev.ctrlKey && actionHistory.length > 0) { // Ctrl+Z event
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "z" && ev.ctrlKey && actionHistory.length > 0) {
+    // Ctrl+Z event
     const lastChange = actionHistory.pop();
     switch (lastChange.action) {
-      case 'move':
-        lastChange.target.style.transform = `translate(${actionHistory.at(-1).value.left-actionHistory.at(-1).target.originalLeft}px, ${actionHistory.at(-1).value.top-actionHistory.at(-1).target.originalTop}px)`;
-      break;
-      case 'edit':
+      case "move":
+        lastChange.target.style.transform = `translate(${
+          actionHistory.at(-1).value.left -
+          actionHistory.at(-1).target.originalLeft
+        }px, ${
+          actionHistory.at(-1).value.top -
+          actionHistory.at(-1).target.originalTop
+        }px)`;
+        break;
+      case "edit":
         lastChange.target.innerHTML = lastChange.value;
-      break;
-      case 'scale':
+        break;
+      case "scale":
         lastChange.target.style.transform = lastChange.value;
-      break;
-      case 'z-index':
+        break;
+      case "z-index":
         lastChange.target.style.zIndex = lastChange.value;
-      break;
-      case 'remove':
+        break;
+      case "remove":
         lastChange.parent.appendChild(lastChange.target);
-      break;
+        break;
+      case "copy":
+        lastChange.parent.removeChild(lastChange.target);
+        break;
     }
-  } else if (ev.key === "Enter" && ev.ctrlKey) { // Ctrl+Enter event
+  } else if (ev.key === "c" && ev.ctrlKey) {
+    // Ctrl+C event
+    copiedElement = selectedElement;
+    console.log("copied!", copiedElement);
+  } else if (ev.key === "v" && ev.ctrlKey) {
+    // Ctrl+V event
+    const newElement = copiedElement.cloneNode(true);
+    enableTweakletForElement(newElement);
+    copiedElement.parentNode.appendChild(newElement);
+    actionHistory.push({
+      target: copiedElement,
+      action: "copy",
+      parent: copiedElement.parentNode,
+    });
+  } else if (ev.key === "Enter" && ev.ctrlKey) {
+    // Ctrl+Enter event
     ev.target.contentEditable = false;
   } else if (ev.key === "Delete") {
     actionHistory.push({
       target: selectedElement,
       action: "remove",
-      parent: selectedElement.parentNode
+      parent: selectedElement.parentNode,
     });
     selectedElement.remove();
     selectedElement = null;
@@ -197,51 +295,66 @@ document.addEventListener("keydown", ev => {
     actionHistory.push({
       target: ev.target,
       action: "edit",
-      value: ev.target.innerHTML
+      value: ev.target.innerHTML,
     });
   }
 });
 
-document.addEventListener("wheel", ev => {
+document.addEventListener("wheel", (ev) => {
   if (selectedElement) {
     ev.stopPropagation();
-    if (ev.deltaY > 0 && ev.shiftKey) { // scale
+    if (ev.deltaY > 0 && ev.shiftKey) {
+      // scale
       if (selectedElement.style.transform.includes(`scale(${scale})`)) {
-        selectedElement.style.transform = selectedElement.style.transform.replace(`scale(${scale})`,`scale(${scale-0.1})`); 
+        selectedElement.style.transform =
+          selectedElement.style.transform.replace(
+            `scale(${scale})`,
+            `scale(${scale - 0.1})`
+          );
       } else {
-        selectedElement.style.transform += `scale(${scale-0.1})`;
+        selectedElement.style.transform += `scale(${scale - 0.1})`;
       }
       scale -= 0.1;
       actionHistory.push({
         target: selectedElement,
         action: "scale",
-        value: selectedElement.style.transform
+        value: selectedElement.style.transform,
       });
     } else if (ev.deltaY < 0 && ev.shiftKey) {
-        if (selectedElement.style.transform.includes(`scale(${scale})`)) {
-        selectedElement.style.transform = selectedElement.style.transform.replace(`scale(${scale})`,`scale(${scale+0.1})`); 
+      if (selectedElement.style.transform.includes(`scale(${scale})`)) {
+        selectedElement.style.transform =
+          selectedElement.style.transform.replace(
+            `scale(${scale})`,
+            `scale(${scale + 0.1})`
+          );
       } else {
-        selectedElement.style.transform += `scale(${scale+0.1})`;
+        selectedElement.style.transform += `scale(${scale + 0.1})`;
       }
       scale += 0.1;
       actionHistory.push({
         target: selectedElement,
         action: "scale",
-        value: selectedElement.style.transform
+        value: selectedElement.style.transform,
       });
-    } else if (ev.deltaY > 0) { // move forward/backwards
-      selectedElement.style.zIndex = String(Number(selectedElement.style.zIndex) + 1);
+    } else if (ev.deltaY > 0) {
+      // move forward/backwards
+      selectedElement.style.zIndex = String(
+        Number(selectedElement.style.zIndex) + 1
+      );
       actionHistory.push({
         target: selectedElement,
         action: "z-index",
-        value: selectedElement.style.zIndex
+        value: selectedElement.style.zIndex,
       });
     } else if (ev.deltaY < 0) {
-      selectedElement.style.zIndex = Number(selectedElement.style.zIndex) >= 0 ? String(Number(selectedElement.style.zIndex) - 1) : "0";
+      selectedElement.style.zIndex =
+        Number(selectedElement.style.zIndex) >= 0
+          ? String(Number(selectedElement.style.zIndex) - 1)
+          : "0";
       actionHistory.push({
         target: selectedElement,
         action: "z-index",
-        value: selectedElement.style.zIndex
+        value: selectedElement.style.zIndex,
       });
     }
   }
