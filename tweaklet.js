@@ -94,16 +94,29 @@ const handleMouseUp = (ev) => {
   if (target) {
     target.style.filter = "none";
   }
-  actionHistory.push({
-    target,
-    action: "move",
-    value: { left: ev.clientX, top: ev.clientY },
-  });
+  const left = ev.clientX;
+  const top = ev.clientY;
+  if (
+    actionHistory.at(-1).action === "move" &&
+    actionHistory.at(-1).value.left === left &&
+    actionHistory.at(-1).value.top === top
+  ) {
+    actionHistory.pop();
+  } else {
+    actionHistory.push({
+      target,
+      action: "move",
+      value: { left, top },
+    });
+  }
   target = null;
 };
 
 const handleMouseDown = (ev) => {
-  if (ev.button === 0) {
+  if (ev.ctrlKey && ev.button === 0) {
+    ev.stopPropagation();
+    ev.target.contentEditable = true;
+  } else if (ev.button === 0) {
     ev.stopPropagation();
     if (selectedElement) {
       selectedElement.style.outline = "none";
@@ -114,11 +127,17 @@ const handleMouseDown = (ev) => {
     target.style.filter = "blur(1px) grayscale(100%)";
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-    actionHistory.push({
-      target,
-      action: "move",
-      value: { left: ev.target.originalLeft, top: ev.target.originalTop },
-    });
+    const entries = getHistoryEntriesBy(
+      target.getAttribute("data-tweaklet-id"),
+      "move"
+    );
+    if (entries && entries.length === 0) {
+      actionHistory.push({
+        target,
+        action: "move",
+        value: { left: ev.target.originalLeft, top: ev.target.originalTop },
+      });
+    }
   }
 };
 
@@ -136,9 +155,24 @@ const handleMouseOver = (ev) => {
   ev.target.addEventListener("mouseleave", handleMouseLeave);
 };
 
-const handleDblClick = (ev) => {
-  ev.stopPropagation();
-  ev.target.contentEditable = true;
+const getHistoryEntriesBy = (targetId, action) =>
+  targetId && action
+    ? actionHistory.filter(
+        (x) =>
+          x.action === action &&
+          x.target.getAttribute("data-tweaklet-id") === targetId
+      )
+    : null;
+
+const generateId = (length = 4) => {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 };
 
 // enable tweaklet for one element
@@ -158,14 +192,14 @@ const enableTweakletForElement = (e) => {
   }
   e.originalTop = rect.top;
   e.originalLeft = rect.left;
-  e.addEventListener("dblclick", handleDblClick);
   e.addEventListener("mousedown", handleMouseDown);
   e.addEventListener("mouseover", handleMouseOver);
+  e.setAttribute("data-tweaklet-id", generateId());
 };
 
 // enable tweaklet
 const enableTweaklet = () => {
-  const elements = document.querySelectorAll("*");
+  const elements = document.body.querySelectorAll("*");
   document.body.style["user-select"] = "none";
   elements.forEach((e) => {
     enableTweakletForElement(e);
@@ -181,7 +215,6 @@ const disableTweaklet = () => {
       e.draggable = "false";
       e.removeEventListener("click", handleAnchorClick);
     }
-    e.removeEventListener("dblclick", handleDblClick);
     e.removeEventListener("mousedown", handleMouseDown);
     e.removeEventListener("mouseover", handleMouseOver);
   });
@@ -220,7 +253,7 @@ instructions.addEventListener("mouseover", () => {
     "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
   overlay.innerHTML = `- Click any element to select<br>
   - Drag any element in the page to change its position<br>
-  - Double click: edit text<br>
+  - Ctrl + click: edit text<br> (Ctrl + Enter to finish)<br>
   - Shift + mouse wheel: resize the element<br>
   - Mouse wheel: bring element forwards/backwards (change z-index)<br>
   - Supr: delete element<br>
@@ -240,12 +273,8 @@ document.addEventListener("keydown", (ev) => {
     switch (lastChange.action) {
       case "move":
         lastChange.target.style.transform = `translate(${
-          actionHistory.at(-1).value.left -
-          actionHistory.at(-1).target.originalLeft
-        }px, ${
-          actionHistory.at(-1).value.top -
-          actionHistory.at(-1).target.originalTop
-        }px)`;
+          lastChange.value.left - lastChange.target.originalLeft
+        }px, ${lastChange.value.top - lastChange.target.originalTop}px)`;
         break;
       case "edit":
         lastChange.target.innerHTML = lastChange.value;
@@ -257,7 +286,10 @@ document.addEventListener("keydown", (ev) => {
         lastChange.target.style.zIndex = lastChange.value;
         break;
       case "remove":
-        lastChange.parent.appendChild(lastChange.target);
+        lastChange.parent.insertBefore(
+          lastChange.target,
+          lastChange.parent.children[lastChange.index]
+        );
         break;
       case "copy":
         lastChange.parent.removeChild(lastChange.target);
@@ -266,7 +298,6 @@ document.addEventListener("keydown", (ev) => {
   } else if (ev.key === "c" && ev.ctrlKey) {
     // Ctrl+C event
     copiedElement = selectedElement;
-    console.log("copied!", copiedElement);
   } else if (ev.key === "v" && ev.ctrlKey) {
     // Ctrl+V event
     const newElement = copiedElement.cloneNode(true);
@@ -284,6 +315,7 @@ document.addEventListener("keydown", (ev) => {
     actionHistory.push({
       target: selectedElement,
       action: "remove",
+      index: 0,
       parent: selectedElement.parentNode,
     });
     selectedElement.remove();
