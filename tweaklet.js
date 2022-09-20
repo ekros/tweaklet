@@ -254,8 +254,8 @@ instructions.addEventListener("mouseover", () => {
   overlay.innerHTML = `- Click any element to select<br>
   - Drag any element in the page to change its position<br>
   - Ctrl + click: edit text<br> (Ctrl + Enter to finish)<br>
-  - Shift + mouse wheel: resize the element<br>
-  - Mouse wheel: bring element forwards/backwards (change z-index)<br>
+  - Shift + mouse wheel or +/-: resize the element<br>
+  - Mouse wheel or PageUp/PageDown: bring element forwards/backwards (change z-index)<br>
   - Supr: delete element<br>
   - Ctrl+Z: to undo changes<br><br>
   know more: tweaklet.com
@@ -323,6 +323,14 @@ document.addEventListener("keydown", (ev) => {
   } else if (ev.key === "Escape") {
     selectedElement.style.outline = "none";
     selectedElement = null;
+  } else if (ev.key === "+") {
+    zoomIn();
+  } else if (ev.key === "-") {
+    zoomOut();
+  } else if (ev.key === "PageUp") {
+    moveBackwards();
+  } else if (ev.key === "PageDown") {
+    moveForwards();
   } else if (ev.key !== "Shift" && ev.key !== "Control") {
     actionHistory.push({
       target: ev.target,
@@ -332,62 +340,78 @@ document.addEventListener("keydown", (ev) => {
   }
 });
 
+const zoomIn = () => {
+  if (selectedElement.style.transform.includes(`scale(${scale})`)) {
+    selectedElement.style.transform =
+      selectedElement.style.transform.replace(
+        `scale(${scale})`,
+        `scale(${scale + 0.1})`
+      );
+  } else {
+    selectedElement.style.transform += `scale(${scale + 0.1})`;
+  }
+  scale += 0.1;
+  actionHistory.push({
+    target: selectedElement,
+    action: "scale",
+    value: selectedElement.style.transform,
+  });
+};
+
+const zoomOut = () => {
+  // scale
+  if (selectedElement.style.transform.includes(`scale(${scale})`)) {
+    selectedElement.style.transform =
+    selectedElement.style.transform.replace(
+      `scale(${scale})`,
+      `scale(${scale - 0.1})`
+      );
+    } else {
+      selectedElement.style.transform += `scale(${scale - 0.1})`;
+    }
+    scale -= 0.1;
+  actionHistory.push({
+    target: selectedElement,
+    action: "scale",
+    value: selectedElement.style.transform,
+  });
+};
+
+const moveForwards = () => {
+    // move forward/backwards
+    selectedElement.style.zIndex = String(
+    Number(selectedElement.style.zIndex) + 1
+  );
+  actionHistory.push({
+    target: selectedElement,
+    action: "z-index",
+    value: selectedElement.style.zIndex,
+  });
+}
+
+const moveBackwards = () => {
+  selectedElement.style.zIndex =
+  Number(selectedElement.style.zIndex) >= 0
+    ? String(Number(selectedElement.style.zIndex) - 1)
+    : "0";
+  actionHistory.push({
+    target: selectedElement,
+    action: "z-index",
+    value: selectedElement.style.zIndex,
+  });
+}
+
 document.addEventListener("wheel", (ev) => {
   if (selectedElement) {
     ev.stopPropagation();
     if (ev.deltaY > 0 && ev.shiftKey) {
-      // scale
-      if (selectedElement.style.transform.includes(`scale(${scale})`)) {
-        selectedElement.style.transform =
-          selectedElement.style.transform.replace(
-            `scale(${scale})`,
-            `scale(${scale - 0.1})`
-          );
-      } else {
-        selectedElement.style.transform += `scale(${scale - 0.1})`;
-      }
-      scale -= 0.1;
-      actionHistory.push({
-        target: selectedElement,
-        action: "scale",
-        value: selectedElement.style.transform,
-      });
+      zoomOut();
     } else if (ev.deltaY < 0 && ev.shiftKey) {
-      if (selectedElement.style.transform.includes(`scale(${scale})`)) {
-        selectedElement.style.transform =
-          selectedElement.style.transform.replace(
-            `scale(${scale})`,
-            `scale(${scale + 0.1})`
-          );
-      } else {
-        selectedElement.style.transform += `scale(${scale + 0.1})`;
-      }
-      scale += 0.1;
-      actionHistory.push({
-        target: selectedElement,
-        action: "scale",
-        value: selectedElement.style.transform,
-      });
+      zoomIn();
     } else if (ev.deltaY > 0) {
-      // move forward/backwards
-      selectedElement.style.zIndex = String(
-        Number(selectedElement.style.zIndex) + 1
-      );
-      actionHistory.push({
-        target: selectedElement,
-        action: "z-index",
-        value: selectedElement.style.zIndex,
-      });
+      moveForwards();
     } else if (ev.deltaY < 0) {
-      selectedElement.style.zIndex =
-        Number(selectedElement.style.zIndex) >= 0
-          ? String(Number(selectedElement.style.zIndex) - 1)
-          : "0";
-      actionHistory.push({
-        target: selectedElement,
-        action: "z-index",
-        value: selectedElement.style.zIndex,
-      });
+      moveBackwards();
     }
   }
 });
