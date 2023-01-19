@@ -55,10 +55,11 @@ body {
 }
 
 .extensions-warning {
-  background: gold;
+  background: #00c4ff4f;
   border-radius: 4px;
+  color: white;
   margin-top: 100px;
-  padding: 3px;
+  padding: 5px;
   transform: translate(50%);
   width: 50%;
 }
