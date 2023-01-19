@@ -251,10 +251,10 @@ instructions.addEventListener("mouseover", () => {
   const overlay = document.createElement("div");
   overlay.style =
     "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
+  // - Shift + mouse wheel or +/-: resize the element<br> <-- add this when zoom feature works
   overlay.innerHTML = `- Click any element to select<br>
   - Drag any element in the page to change its position<br>
   - Ctrl + click: edit text<br> (Ctrl + Enter to finish)<br>
-  - Shift + mouse wheel or +/-: resize the element<br>
   - Mouse wheel or PageUp/PageDown: bring element forwards/backwards (change z-index)<br>
   - Supr: delete element<br>
   - Ctrl+Z: to undo changes<br><br>
@@ -324,9 +324,9 @@ document.addEventListener("keydown", (ev) => {
     selectedElement.style.outline = "none";
     selectedElement = null;
   } else if (ev.key === "+") {
-    zoomIn();
+    // zoomIn();
   } else if (ev.key === "-") {
-    zoomOut();
+    // zoomOut();
   } else if (ev.key === "PageUp") {
     moveBackwards();
   } else if (ev.key === "PageDown") {
@@ -340,17 +340,35 @@ document.addEventListener("keydown", (ev) => {
   }
 });
 
+  // TODO: this is a disaster.. why cannot just add a Regexp to replace whatever is inside scale(x) with its own value + 0.1  ????
+  // If I'm not able to do this I will remove this feature and add a task for the future
+  // declare RegExp to select scale value
+  // use it to read current value
+  // use it again to replace current value
+  // set default value in case it doesn't exist
+
 const zoomIn = () => {
-  if (selectedElement.style.transform.includes(`scale(${scale})`)) {
-    selectedElement.style.transform =
-      selectedElement.style.transform.replace(
-        `scale(${scale})`,
-        `scale(${scale + 0.1})`
-      );
-  } else {
-    selectedElement.style.transform += `scale(${scale + 0.1})`;
-  }
-  scale += 0.1;
+  // if (!selectedElement.getAttribute("data-tweaklet-scale")) {
+  //   selectedElement.setAttribute("data-tweaklet-scale", 1);
+  // }
+  // const currentScale = Number(selectedElement.getAttribute("data-tweaklet-scale")).toFixed(1);
+  
+
+
+
+  // console.log("zoomin currentScale", currentScale); 
+  // console.log("transform", selectedElement.style.transform);
+  // if (selectedElement.style.transform.includes('scale')) {
+  //     selectedElement.style.transform = selectedElement.style.transform.replace(/scale\(.*\)/, `scale(${currentScale + 0.1})`)
+  //     console.log("transform after", selectedElement.style.transform);
+  //   } else {
+  //     console.log("trans", (Number(selectedElement.getAttribute("data-tweaklet-scale")) + 0.1).toFixed(1))
+  //   // selectedElement.style.transform.replace(/scale\(.*\)/, '');
+  //   selectedElement.style.transform += `scale(${(Number(selectedElement.getAttribute("data-tweaklet-scale")) + 0.1).toFixed(1)})`;
+  //   console.log("new value!!", selectedElement.style.transform);
+  // }
+  // selectedElement.setAttribute("data-tweaklet-scale", String(Number(selectedElement.getAttribute("data-tweaklet-scale")) + 0.1));
+  // scale += 0.1;
   actionHistory.push({
     target: selectedElement,
     action: "scale",
@@ -359,17 +377,22 @@ const zoomIn = () => {
 };
 
 const zoomOut = () => {
-  // scale
-  if (selectedElement.style.transform.includes(`scale(${scale})`)) {
+  if (!selectedElement.getAttribute("data-tweaklet-scale")) {
+    selectedElement.setAttribute("data-tweaklet-scale", 1);
+  }  
+  const currentScale = selectedElement.getAttribute("data-tweaklet-scale");
+  console.log("zoomOut currentScale", currentScale);
+  console.log("transform", selectedElement.style.transform);
+  if (selectedElement.style.transform.includes(`scale(${currentScale})`)) {
     selectedElement.style.transform =
     selectedElement.style.transform.replace(
-      `scale(${scale})`,
-      `scale(${scale - 0.1})`
+      `scale(${currentScale})`,
+      `scale(${currentScale - 0.1})`
       );
     } else {
-      selectedElement.style.transform += `scale(${scale - 0.1})`;
+      selectedElement.style.transform += `scale(${Number(selectedElement.getAttribute("data-tweaklet-scale"))})`;
     }
-    scale -= 0.1;
+    selectedElement.setAttribute("data-tweaklet-scale", String(Number(selectedElement.getAttribute("data-tweaklet-scale")) - 0.1));
   actionHistory.push({
     target: selectedElement,
     action: "scale",
@@ -405,9 +428,9 @@ document.addEventListener("wheel", (ev) => {
   if (selectedElement) {
     ev.stopPropagation();
     if (ev.deltaY > 0 && ev.shiftKey) {
-      zoomOut();
+      // zoomOut(); // TODO: re-enable feature when fixed
     } else if (ev.deltaY < 0 && ev.shiftKey) {
-      zoomIn();
+      // zoomIn(); // TODO: re-enable feature when fixed
     } else if (ev.deltaY > 0) {
       moveForwards();
     } else if (ev.deltaY < 0) {
