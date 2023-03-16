@@ -72,7 +72,6 @@ const handleAnchorClick = (ev) => {
 };
 
 const handlePointerMove = (ev) => {
-  console.log("ev", ev)
   if (target) {
     if (target.style.transform.includes("translate")) {
       target.style.transform = target.style.transform.replace(
@@ -90,7 +89,6 @@ const handlePointerMove = (ev) => {
 };
 
 const handlePointerUp = (ev) => {
-  console.log("pointer up") // POINTER EVENTS STILL BEHAVING WEIRD WHEN DRAGING ON MOBILE 
   document.removeEventListener("pointerup", handlePointerUp);
   document.removeEventListener("pointermove", handlePointerMove);
   if (target) {
@@ -391,8 +389,6 @@ const zoomOut = () => {
     selectedElement.setAttribute("data-tweaklet-scale", 1);
   }  
   const currentScale = selectedElement.getAttribute("data-tweaklet-scale");
-  console.log("zoomOut currentScale", currentScale);
-  console.log("transform", selectedElement.style.transform);
   if (selectedElement.style.transform.includes(`scale(${currentScale})`)) {
     selectedElement.style.transform =
     selectedElement.style.transform.replace(
