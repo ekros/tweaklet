@@ -71,7 +71,8 @@ const handleAnchorClick = (ev) => {
   ev.preventDefault();
 };
 
-const handleMouseMove = (ev) => {
+const handlePointerMove = (ev) => {
+  console.log("ev", ev)
   if (target) {
     if (target.style.transform.includes("translate")) {
       target.style.transform = target.style.transform.replace(
@@ -88,9 +89,10 @@ const handleMouseMove = (ev) => {
   }
 };
 
-const handleMouseUp = (ev) => {
-  document.removeEventListener("mouseup", handleMouseUp);
-  document.removeEventListener("mousemove", handleMouseMove);
+const handlePointerUp = (ev) => {
+  console.log("pointer up") // POINTER EVENTS STILL BEHAVING WEIRD WHEN DRAGING ON MOBILE 
+  document.removeEventListener("pointerup", handlePointerUp);
+  document.removeEventListener("pointermove", handlePointerMove);
   if (target) {
     target.style.filter = "none";
   }
@@ -112,7 +114,7 @@ const handleMouseUp = (ev) => {
   target = null;
 };
 
-const handleMouseDown = (ev) => {
+const handlePointerDown = (ev) => {
   if (ev.ctrlKey && ev.button === 0) {
     ev.stopPropagation();
     ev.target.contentEditable = true;
@@ -125,8 +127,8 @@ const handleMouseDown = (ev) => {
     selectedElement.style.outline = "2px solid green";
     target = ev.target;
     target.style.filter = "blur(1px) grayscale(100%)";
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
     const entries = getHistoryEntriesBy(
       target.getAttribute("data-tweaklet-id"),
       "move"
@@ -148,7 +150,7 @@ const handleMouseLeave = (ev) => {
   ev.target.removeEventListener("mouseleave", handleMouseLeave);
 };
 
-const handleMouseOver = (ev) => {
+const handlePointerOver = (ev) => {
   if (ev.target.style.outline !== "green solid 2px") {
     ev.target.style.outline = "1px solid black";
   }
@@ -180,7 +182,7 @@ const enableTweakletForElement = (e) => {
   // disable draggable behaviour on anchors
   if (e.nodeName === "A") {
     e.draggable = "false";
-    e.addEventListener("click", handleAnchorClick);
+    e.addEventListener("pointerdown", handleAnchorClick);
   }
   // inline elements
   if (inlineElements.includes(e.nodeName)) {
@@ -192,9 +194,13 @@ const enableTweakletForElement = (e) => {
   }
   e.originalTop = rect.top;
   e.originalLeft = rect.left;
-  e.addEventListener("mousedown", handleMouseDown);
-  e.addEventListener("mouseover", handleMouseOver);
+  e.addEventListener("pointerdown", handlePointerDown);
+  e.addEventListener("pointerover", handlePointerOver);
   e.setAttribute("data-tweaklet-id", generateId());
+};
+
+const handleTouchMove = ev => {
+  ev.preventDefault();
 };
 
 // enable tweaklet
@@ -204,6 +210,9 @@ const enableTweaklet = () => {
   elements.forEach((e) => {
     enableTweakletForElement(e);
   });
+
+  // prevent scrolling on mobile while dragging
+  document.addEventListener("touchmove", handleTouchMove, { passive: false });
 };
 
 const disableTweaklet = () => {
@@ -213,11 +222,12 @@ const disableTweaklet = () => {
     // disable draggable behaviour on anchors
     if (e.nodeName === "A") {
       e.draggable = "false";
-      e.removeEventListener("click", handleAnchorClick);
+      e.removeEventListener("pointerdown", handleAnchorClick);
     }
-    e.removeEventListener("mousedown", handleMouseDown);
-    e.removeEventListener("mouseover", handleMouseOver);
+    e.removeEventListener("pointerdown", handlePointerDown);
+    e.removeEventListener("pointerover", handlePointerOver);
   });
+  document.removeEventListener("touchmove", handleTouchMove);
 };
 
 // draw indicator
@@ -227,7 +237,7 @@ indicator.style =
 indicator.title = "Click to enable/disable";
 indicator.innerHTML = "Tweaklet enabled";
 document.body.appendChild(indicator);
-indicator.addEventListener("click", () => {
+indicator.addEventListener("pointerdown", () => {
   if (enabled) {
     indicator.style.background = "red";
     indicator.innerHTML = "Tweaklet disabled";
@@ -247,7 +257,7 @@ instructions.style =
   "position:fixed;top:0px;left:calc(50vw + 120px);background:orange;padding:0px 3px;font-size:14px;cursor:pointer";
 instructions.innerHTML = "?";
 document.body.appendChild(instructions);
-instructions.addEventListener("mouseover", () => {
+instructions.addEventListener("pointerover", () => {
   const overlay = document.createElement("div");
   overlay.style =
     "position:fixed;top:20px;left:60%;background:whitesmoke;width:400px;border:1px solid black;z-index: 100;padding:20px;";
