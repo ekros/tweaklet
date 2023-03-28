@@ -1,6 +1,6 @@
 body {
   font-family: 'Secular One', sans-serif;
-  background: linear-gradient(158.15deg, #f03573 0%, #6060f1 100%);
+  background: linear-gradient(90deg, #f03573 0%, #6060f1 100%);
 }
 
 .layout {
@@ -19,6 +19,14 @@ body {
   text-align: center;
 }
 
+.call-to-action-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;  
+}
+
 .call-to-action {
   display: flex;
   position: relative;
@@ -26,7 +34,6 @@ body {
   justify-content: center;
   align-self: center;
   width: fit-content;
-  height: 70px;
   background: pink;
   border-radius: 3px;
   box-shadow: 2px 2px 4px black;
