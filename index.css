@@ -3,6 +3,12 @@ body {
   background: linear-gradient(90deg, #f03573 0%, #6060f1 100%);
 }
 
+.ad-wrapper {
+  position: fixed;
+  right: 0px;
+  top: calc(50% - 300px);
+}
+
 .layout {
   display: flex;
   flex-direction: column;
