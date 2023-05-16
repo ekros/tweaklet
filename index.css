@@ -133,3 +133,9 @@ a {
   top: 10px;
   right: 10px;
 }
+
+@media (max-width: 1060px) {
+  .ad-wrapper {
+    display: none;
+  }
+}
