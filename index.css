@@ -3,6 +3,10 @@ body {
   background: linear-gradient(90deg, #f03573 0%, #6060f1 100%);
 }
 
+a {
+  text-decoration: none;
+}
+
 .ad-wrapper {
   position: fixed;
   right: 0px;
@@ -67,11 +71,15 @@ body {
   font-size: 0px;
 }
 
+.info-icon {
+  vertical-align: bottom;
+}
+
 .extensions-warning {
   background: #00c4ff4f;
   border-radius: 4px;
   color: white;
-  margin-top: 100px;
+  margin-top: 10px;
   padding: 5px;
   transform: translate(50%);
   width: 50%;
@@ -81,9 +89,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  position: absolute;
-  bottom: 20px;
   font-size: 12px;
+  margin-top: 20px;
   text-align: center;
   width: 99%;
 }
