@@ -1,6 +1,4 @@
-/* tweaklet bookmarklet
-// The aim of this demo is to create a bookmarklet
-// to modify elements on the page */
+// tweaklet bookmarklet
 
 let target;
 let scale = 1;
@@ -66,6 +64,14 @@ const inlineElements = [
 ];
 const actionHistory = [];
 let copiedElement;
+
+const ICONS = {
+  EDIT: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAfklEQVR4nNXPsQkCURAE0IeBIGoNdnH4Q8HWtAljje8nhhpoBae2IdiAyME2sAYHN9kEb9hl4DTYY/oPLvjgi5odKYE7bGNkl8XPgF30JoMrFnhELxl8xhJt9PU48C1+rpmf+8xwwhv3LN5gghWOWQxXHGJknsV9XrjEJSPKD4rTKJQFj5cRAAAAAElFTkSuQmCC",
+  LAYER_UP: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA8klEQVR4nJ3TsUoDQRQF0FOIEW2FRfBTLCwEv8AqTdLY+AGmtLQVbPyQVGm28CvEgGBjoY2FxDTKwJtl2MjuxgsPBt69d+5j3tCN46itUeEWX/jGw1CjqhD+tKrTqOoQ9hrNsBogbNcqtHZxidctxG+4xl45xjk+se4QroOTuA1OsMBLJNn/I1G+8QAXeMIjzpLBKWosMcVOGI9wFZXOojcNbh3ajRGeMSmMxHkSvY0RRnFLijzHONyzURbW0ZsHt0k2iydZxD5k5NHaUavgNs+oWKR33OGojBg4xE1wejeyNBokbCOR7vERlc7/+pW93/kXzDVq6/MQwDIAAAAASUVORK5CYII=",
+  LAYER_DOWN: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA3klEQVR4nN2VTQrCMBCFv5XSLjxRoRvP4tbqxk2h3suNi1zFSvUQEWEKYWjSn6QgPniLZJr3Jn2BgR9CAdwAA+xTCpfAHbBAK7Sy961Fd2yBF3ABcmADHICH1GbfyCessZ1r5Aq/A8I+o9ZnpIWvwG5ByDlwHDJyQ+yAs+q8nBhyLmc73yNwhZ5ArdYVkAkr2euFarUOvq5GPuyFTyKqkUmtF7Zy9g9DLkY6L5y6S200epNQyDbAqJDtTE4OOYYmFHJKmqGQVzFY/RdpLDUyMXPBphSeamTWms3RszgpPhQ38R1h3v6KAAAAAElFTkSuQmCC",
+  DUPLICATE: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAZElEQVR4nOXUWwrAIAxE0bu8Sve/Ae0+xv9C+ggxaDuQL4kHExC+HDmrAWUkIKBmvDwf2IEjYOaygBY0c1mAd3Y69c0J6MXZjwDd1PzA+jtIBa7yuG840II+OzPFiVRgs69dPR1cjsKRt7mLFwAAAABJRU5ErkJggg==",
+  DELETE: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAoUlEQVR4nM2TQQqDMBRE3xWEKq4M3bpybaErr9BL9BzeoXgE0Z16vxKYFEmJTRYFBwYmn/lDfsiHMO7AQ7Q6CTXwAjrR6uZX0xOYgAEYgVV6kB6lJ3m/YIA+4na9vCcP6DyTUS06INfDXYEK2IAydYQCWMQidQR3dgEmNaDSCKU3TnTATY0OuWrRARzgfwGZ/rtboBBn4BJKb3crHKL1fPAGGL0nfHYa4BsAAAAASUVORK5CYII="
+}
 
 const handleAnchorClick = (ev) => {
   ev.preventDefault();
@@ -138,6 +144,8 @@ const handlePointerDown = (ev) => {
         value: { left: ev.target.originalLeft, top: ev.target.originalTop },
       });
     }
+    // render actionMenu
+    renderActionMenu(ev.target);
   }
 };
 
@@ -154,6 +162,82 @@ const handlePointerOver = (ev) => {
   }
   ev.target.addEventListener("mouseleave", handleMouseLeave);
 };
+
+const duplicateElement = element => {
+  const newElement = element.cloneNode(true);
+  enableTweakletForElement(newElement);
+  element.parentNode.appendChild(newElement);
+  actionHistory.push({
+    target: element,
+    action: "copy",
+    parent: element.parentNode,
+  });
+}
+
+// TODO-ING: render action menu
+// edit DONE
+// delete DONE
+// move forwards / backwards DONE
+// copy DONE
+// bring small icons in base64 here DONE
+// duplicate function shouldn't copy the action menu (you can remove it before applying action)
+// the edit action (both button and shortcut) should select all the text
+// add button to save changes after edition
+const renderActionMenu = targetElement => {
+  console.log("target el", targetElement);
+  const commonBtnStyle = "background:white;cursor:pointer;padding:3px;border:1px solid gray;";
+  const menu = document.createElement("div");
+  // edit
+  const editBtn = document.createElement("img");
+  editBtn.src = ICONS.EDIT;
+  editBtn.style = commonBtnStyle;
+  editBtn.onclick = ev => {
+    ev.preventDefault();
+    targetElement.contentEditable = true;
+    // TODO: select all text or focus on it to indicate you can edit now
+  }
+  menu.appendChild(editBtn);
+  // delete
+  const deleteBtn = document.createElement("img");
+  deleteBtn.src = ICONS.DELETE;
+  deleteBtn.style = commonBtnStyle;
+  deleteBtn.onclick = ev => {
+    ev.preventDefault();
+    targetElement.remove();
+  }
+  menu.appendChild(deleteBtn);
+  // move forwards / backwards
+  const moveForwardsBtn = document.createElement("img");
+  moveForwardsBtn.src = ICONS.LAYER_UP;
+  moveForwardsBtn.style = commonBtnStyle;
+  moveForwardsBtn.onclick = ev => {
+    ev.preventDefault();
+    moveForwards();
+  }
+  menu.appendChild(moveForwardsBtn);
+  const moveBackwardsBtn = document.createElement("img");
+  moveBackwardsBtn.src = ICONS.LAYER_DOWN;
+  moveBackwardsBtn.style = commonBtnStyle;
+  moveBackwardsBtn.onclick = ev => {
+    ev.preventDefault();
+    moveBackwards();
+  }
+  menu.appendChild(moveBackwardsBtn);
+  // duplicate 
+  const duplicateBtn = document.createElement("img");
+  duplicateBtn.src = ICONS.DUPLICATE;
+  duplicateBtn.style = commonBtnStyle;
+  duplicateBtn.onclick = ev => {
+    ev.preventDefault();
+    duplicateElement(targetElement);
+  }
+  menu.appendChild(duplicateBtn);
+  
+  menu.style = "position: fixed; display: flex; bottom: -30px; left: 0px; font-size: 12px; font-family: arial;";
+  menu.appendChild(deleteBtn);
+
+  targetElement.append(menu);
+}
 
 const getHistoryEntriesBy = (targetId, action) =>
   targetId && action
@@ -265,6 +349,7 @@ instructions.addEventListener("pointerover", () => {
   - Ctrl + click: edit text<br> (Ctrl + Enter to finish)<br>
   - Mouse wheel or PageUp/PageDown: bring element forwards/backwards (change z-index)<br>
   - Supr: delete element<br>
+  - Ctrl+C/V: copy and paste element<br>
   - Ctrl+Z: to undo changes<br><br>
   know more: tweaklet.com
   `;
@@ -308,14 +393,7 @@ document.addEventListener("keydown", (ev) => {
     copiedElement = selectedElement;
   } else if (ev.key === "v" && ev.ctrlKey) {
     // Ctrl+V event
-    const newElement = copiedElement.cloneNode(true);
-    enableTweakletForElement(newElement);
-    copiedElement.parentNode.appendChild(newElement);
-    actionHistory.push({
-      target: copiedElement,
-      action: "copy",
-      parent: copiedElement.parentNode,
-    });
+    duplicateElement(copiedElement);
   } else if (ev.key === "Enter" && ev.ctrlKey) {
     // Ctrl+Enter event
     ev.target.contentEditable = false;

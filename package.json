@@ -18,7 +18,7 @@
     "url": "https://github.com/ekros/tweaklet/issues"
   },
   "homepage": "https://github.com/ekros/tweaklet#readme",
-  "dependencies": {
+  "devDependencies": {
     "serve": "^13.0.2",
     "uglify-js": "^3.16.1"
   }
