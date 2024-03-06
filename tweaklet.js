@@ -4,6 +4,7 @@ let target;
 let scale = 1;
 let enabled = true;
 let selectedElement;
+const menuWrapperId = "tweaklet-menu-wrapper";
 const inlineElements = [
   "A",
   "ABBR",
@@ -97,6 +98,7 @@ const handlePointerMove = (ev) => {
 const handlePointerUp = (ev) => {
   document.removeEventListener("pointerup", handlePointerUp);
   document.removeEventListener("pointermove", handlePointerMove);
+
   if (target) {
     target.style.filter = "none";
   }
@@ -119,33 +121,36 @@ const handlePointerUp = (ev) => {
 };
 
 const handlePointerDown = (ev) => {
-  if (ev.ctrlKey && ev.button === 0) {
-    ev.stopPropagation();
-    ev.target.contentEditable = true;
-  } else if (ev.button === 0) {
-    ev.stopPropagation();
-    if (selectedElement) {
-      selectedElement.style.outline = "none";
+  if (ev.target.className !== "tweaklet-action-button") { // ignore this event for action buttons
+    if (ev.ctrlKey && ev.button === 0) {
+      ev.stopPropagation();
+      ev.target.contentEditable = true;
+    } else if (ev.button === 0) {
+      ev.stopPropagation();
+      if (selectedElement) {
+        selectedElement.style.outline = "none";
+      }
+      selectedElement = ev.target;
+      selectedElement.style.outline = "2px solid green";
+      target = ev.target;
+      target.style.filter = "grayscale(100%)";
+      document.addEventListener("pointermove", handlePointerMove);
+      document.addEventListener("pointerup", handlePointerUp);
+      const entries = getHistoryEntriesBy(
+        target.getAttribute("data-tweaklet-id"),
+        "move"
+      );
+      if (entries && entries.length === 0) {
+        actionHistory.push({
+          target,
+          action: "move",
+          value: { left: ev.target.originalLeft, top: ev.target.originalTop },
+        });
+      }
+      // render actionMenu
+      document.getElementById(menuWrapperId)?.remove(); // remove previous menu
+      renderActionMenu(ev.target);
     }
-    selectedElement = ev.target;
-    selectedElement.style.outline = "2px solid green";
-    target = ev.target;
-    target.style.filter = "blur(1px) grayscale(100%)";
-    document.addEventListener("pointermove", handlePointerMove);
-    document.addEventListener("pointerup", handlePointerUp);
-    const entries = getHistoryEntriesBy(
-      target.getAttribute("data-tweaklet-id"),
-      "move"
-    );
-    if (entries && entries.length === 0) {
-      actionHistory.push({
-        target,
-        action: "move",
-        value: { left: ev.target.originalLeft, top: ev.target.originalTop },
-      });
-    }
-    // render actionMenu
-    renderActionMenu(ev.target);
   }
 };
 
@@ -180,6 +185,8 @@ const duplicateElement = element => {
 // move forwards / backwards DONE
 // copy DONE
 // bring small icons in base64 here DONE
+// in some elements the menu dissapear on mouse up
+// add titles to menu buttons
 // duplicate function shouldn't copy the action menu (you can remove it before applying action)
 // the edit action (both button and shortcut) should select all the text
 // add button to save changes after edition
@@ -187,18 +194,22 @@ const renderActionMenu = targetElement => {
   console.log("target el", targetElement);
   const commonBtnStyle = "background:white;cursor:pointer;padding:3px;border:1px solid gray;";
   const menu = document.createElement("div");
+  menu.setAttribute("id", menuWrapperId);
   // edit
   const editBtn = document.createElement("img");
+  editBtn.className = "tweaklet-action-button"
   editBtn.src = ICONS.EDIT;
   editBtn.style = commonBtnStyle;
-  editBtn.onclick = ev => {
+  editBtn.onclick = (ev, target) => {
     ev.preventDefault();
     targetElement.contentEditable = true;
+    console.log("target el", targetElement);
     // TODO: select all text or focus on it to indicate you can edit now
   }
   menu.appendChild(editBtn);
   // delete
   const deleteBtn = document.createElement("img");
+  deleteBtn.className = "tweaklet-action-button"
   deleteBtn.src = ICONS.DELETE;
   deleteBtn.style = commonBtnStyle;
   deleteBtn.onclick = ev => {
@@ -208,6 +219,7 @@ const renderActionMenu = targetElement => {
   menu.appendChild(deleteBtn);
   // move forwards / backwards
   const moveForwardsBtn = document.createElement("img");
+  moveForwardsBtn.className = "tweaklet-action-button"
   moveForwardsBtn.src = ICONS.LAYER_UP;
   moveForwardsBtn.style = commonBtnStyle;
   moveForwardsBtn.onclick = ev => {
@@ -216,6 +228,7 @@ const renderActionMenu = targetElement => {
   }
   menu.appendChild(moveForwardsBtn);
   const moveBackwardsBtn = document.createElement("img");
+  moveBackwardsBtn.className = "tweaklet-action-button"
   moveBackwardsBtn.src = ICONS.LAYER_DOWN;
   moveBackwardsBtn.style = commonBtnStyle;
   moveBackwardsBtn.onclick = ev => {
@@ -225,6 +238,7 @@ const renderActionMenu = targetElement => {
   menu.appendChild(moveBackwardsBtn);
   // duplicate 
   const duplicateBtn = document.createElement("img");
+  duplicateBtn.className = "tweaklet-action-button"
   duplicateBtn.src = ICONS.DUPLICATE;
   duplicateBtn.style = commonBtnStyle;
   duplicateBtn.onclick = ev => {
